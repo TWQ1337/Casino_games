@@ -1,3 +1,5 @@
+import json
+import os
 from tkinter import *
 from PIL import ImageTk,Image
 import secrets
@@ -13,6 +15,12 @@ root["bg"]="#C4C4C4"
 
 
 # general info
+
+default_player = {
+    "gold" : 1000,
+    "skill" : 0,
+    "won"   : 0
+        }
 
 list_of_labels = list()
 set = list("234567890JQKA")
@@ -66,9 +74,11 @@ class player:
         self.labels = []
         self.labels_score = []
         self.labels_status = []
+        self.p_data = self.load_data()
 #method that set a self.deck reference to on of list objects.
     def unpack_deck(self, i):
         self.deck = self.packed_deck[i]
+
 
 #method that shows current cards in deck with number deck_n text redundant
     '''
@@ -95,7 +105,7 @@ class player:
         summ = 0
         for i in self.deck:
             summ = summ + self.deck[i]
-        text =f"PLAYER SCORE IS {summ}"
+        text =f"{self.name.upper()} SCORE IS {summ}"
         plr_score_lbl.configure(text=text)
         return summ
 
@@ -207,6 +217,43 @@ class player:
 
             i.place(relx=count, rely=0.1)
             count += 0.44/count2
+
+
+    def check_save_folder(self):
+        #checking save_folder
+        if os.path.exists("savesJSON"):
+            return True
+        else:
+            os.mkdir("savesJSON")
+            print("creating save folder")
+            return True
+
+    def save_vibe(self):
+        #checking is save exists, creating new file if nothing found
+        if os.path.isfile(f"savesJSON/{self.name}.json"):
+            print (f"hello, {self.name}! Loading file now.")
+            save_data = open(f"savesJSON/{self.name}.json", "r")
+            return True
+        else:
+            print("New player, welcome, creating save file")
+            save_data = open(f"savesJSON/{self.name}.json", "x")
+            save_data.write(json.dumps(default_player, indent=2))
+            return False
+
+    def load_data(self):
+        #self.check_save_folder()
+        #self.save_vibe()
+        if self.check_save_folder() and self.save_vibe():
+            p_data = json.load(open(f"savesJSON/{self.name}.json", "r"))
+            print("data loaded")
+            return p_data
+        elif self.check_save_folder() and not self.save_vibe():
+            p_data = json.load(open(f"savesJSON/{self.name}.json", "r"))
+            return p_data
+
+    def save_data(self, p_data):
+        save_data = open(f"savesJSON/{self.name}.json", "w")
+        save_data.write(json.dumps(p_data, indent=2))
 
 class dealer(player):
 
@@ -336,6 +383,7 @@ class dealer(player):
         x = list(self.deck.keys())
         coord_l = list()
         # creating coordinates to crop picture by
+        #todo: use any methode to check
         for i in x:
             b = i[0]
             if b == "A":
@@ -434,8 +482,8 @@ class dealer(player):
 
 # todo gold, name, skill attachment.
 
-def game_init():
-    p1 = player(player)
+def game_init(p_name):
+    p1 = player(p_name)
     # dealer inint
     dealer1 = dealer(secrets.choice(dealer_names))
     print(f"Your dealer is: {dealer1.name}")
@@ -511,7 +559,6 @@ def button_input(plr, dlr, main_deck, deck_n, button_input):
             text = "BUST!"
             win_label.configure(text=text)
             a = (plr, dlr)
-            start_button_place(a)
             bust = True
 
     elif button_input == "double":
@@ -620,15 +667,16 @@ def game(plr, dlr):
 
     #plr zone
 
-
+    name_upper = plr.name.upper()
     player_hand = Canvas(root, bg="#C4C4C4", highlightthickness=1, highlightbackground="#989898")
     player_hand.place(relheight=0.225, relwidth=0.896, relx=0.05, rely=0.566)
 
-    plr_name_lbl = Label(root, text=f"Shrek 2 on dvd", bg="#C4C4C4")
+    plr_name_lbl = Label(root, text=f"{name_upper}'S HAND", bg="#C4C4C4")
     plr_name_lbl.configure(font=("Open Sans", 14, "italic"))
     plr_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.555)
 
-    plr_score_lbl = Label(root, text="PLAYER'S SCORE: ???", bg="#D6D6D6", bd=0)
+
+    plr_score_lbl = Label(root, text=f"f{name_upper}'S SCORE: ???", bg="#D6D6D6", bd=0)
     plr_score_lbl.configure(font=("Open Sans", 12, "bold"))
     plr_score_lbl.place(relheight=0.0499, relwidth=0.896, relx=0.05, rely=0.791)
 
@@ -672,12 +720,30 @@ def start_button_place(a):
     startb.configure(font=("Open Sans", 12, "bold"))
     startb.place(relheight=0.0838, relwidth=0.653, relx=0.173, rely=0.864)
 
-def game_loop():
-    d1_p1 = game_init()
+def game_loop(p_name):
+    d1_p1 = game_init(p_name)
     start_button_place(d1_p1)
 
 
-game_loop()
+def login():
+    p1 = txt.get()
+    for i in root.winfo_children():
+        i.destroy()
+    game_loop(p1)
+
+txt = Entry(root, width=10)
+txt.place(rely=0.45, relx=0.45)
+txt.focus()
+
+login_button = Button(root, text="Login", command=login)
+login_button.place(rely=0.55, relx=0.34)
+
+
+
+
+
+
+#game_loop()
 #start_button_place()
 root.mainloop()
 
