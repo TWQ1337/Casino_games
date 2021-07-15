@@ -9,7 +9,7 @@ import time
 root = Tk()
 root.title("Casino Games V_0.2")
 root.iconbitmap("data/card-games.ico")
-root.geometry("600x501")
+root.geometry("780x780")
 root["bg"]="#C4C4C4"
 
 
@@ -68,7 +68,7 @@ class player:
     #  self.deck = dict()
         self.deck = {}
         self.name = name
-        #list with all decks that playrs have
+        #list with all decks that player have
         self.packed_deck = [{},]
         self.num_of_decks = 1
         self.labels = []
@@ -241,23 +241,18 @@ class player:
             return False
 
     def load_data(self):
-        #self.check_save_folder()
-        #self.save_vibe()
-        if self.check_save_folder() and self.save_vibe():
-            p_data = json.load(open(f"savesJSON/{self.name}.json", "r"))
-            print("data loaded")
-            return p_data
-        elif self.check_save_folder() and not self.save_vibe():
-            p_data = json.load(open(f"savesJSON/{self.name}.json", "r"))
-            return p_data
+        self.check_save_folder()
+        self.save_vibe()
+        p_data = json.load(open(f"savesJSON/{self.name}.json", "r"))
+        print("data loaded")
+        return p_data
 
-    def save_data(self, p_data):
+    def save_data(self):
         save_data = open(f"savesJSON/{self.name}.json", "w")
-        save_data.write(json.dumps(p_data, indent=2))
+        save_data.write(json.dumps(self.p_data, indent=2))
 
 class dealer(player):
-
-    def show_top_deck (self):
+   def show_top_deck (self):
         self.unpack_deck(0)
         x = list(self.deck.keys())
         coord_l = list()
@@ -312,7 +307,7 @@ class dealer(player):
                 right = c_value * (w / 13)
                 upper = c_suit * (h / 5)
                 lower = (c_suit + 1) * (h / 5)
-                # actualy cropping image
+                # actualy cropping imagea
                 img_croped = img.crop([left, upper, right, lower])
                 # resizing the image
                 root.update()
@@ -341,7 +336,19 @@ class dealer(player):
             count += 0.44 / count2
 
 
-    def show_top_deck_text(self, ):
+   def check_save_folder(self):
+       pass
+
+   def save_vibe(self):
+       pass
+
+   def load_data(self):
+       pass
+
+   def save_data(self):
+       pass
+
+   def show_top_deck_text(self, ):
         self.unpack_deck(0)
         a = list(self.deck.keys())
         b = f"Dealer's hand {str(a[0])} + {len(a)-1} cards"
@@ -349,21 +356,21 @@ class dealer(player):
         lbl.grid(row=0, column=0)
 
 
-    def ai(self, deck_name):
+   def ai(self, deck_name):
         self.unpack_deck(0)
         while self.ace_check(0) < 17:
             deck_name.card_deal(self, 0)
         self.show_deck(0)
         self.card_score(0)
 
-    def card_dealt(self):
+   def card_dealt(self):
         self.unpack_deck(0)
         if self.deck != {}:
             return False
         else:
             return True
 
-    def show_deck_text(self, deck_n):
+   def show_deck_text(self, deck_n):
         self.unpack_deck(deck_n)
         a = list(self.deck.keys())
         b = ""
@@ -378,7 +385,7 @@ class dealer(player):
         v = self.labels[deck_n]
         v.grid(row=deck_n, column=0)
 
-    def show_deck(self, deck_n):
+   def show_deck(self, deck_n):
         self.unpack_deck(0)
         x = list(self.deck.keys())
         coord_l = list()
@@ -455,7 +462,7 @@ class dealer(player):
             count += 0.44/count2
 
     #method that shows card score in deck with number deck_n
-    def card_score(self, deck_n):
+   def card_score(self, deck_n):
         self.unpack_deck(deck_n)
         summ = 0
         for i in self.deck:
@@ -466,7 +473,7 @@ class dealer(player):
         return summ
 
 #method that checks if ace should be counted as 1 or 11 in deck with number dekc_n
-    def ace_check(self, deck_n):
+   def ace_check(self, deck_n):
         self.unpack_deck(deck_n)
         check = True
         while check:
@@ -494,6 +501,7 @@ def game_init(p_name):
 
 #buttons functions
 def buttons_init(plr, dlr, main_deck, deck_n):
+    dlr.show_top_deck()
     #TODO bind buttons to global widged
     global hit_button, split_button, double_button, stand_button
 
@@ -515,7 +523,7 @@ def buttons_init(plr, dlr, main_deck, deck_n):
                            command=lambda: button_input(plr, dlr, main_deck, deck_n, "double"))
     double_button.configure(font=("Open Sans", 11, "bold"))
     double_button.place(relheight=0.083, relwidth=0.166, relx=0.313, rely=0.872)
-    if not len(plr.deck) == 2:
+    if not len(plr.deck) == 2 or plr.bet>=plr.p_data["gold"]:
         double_button["state"]=DISABLED
 
     stand_button = Button(root, text="STAND", bg="#969696",
@@ -531,12 +539,20 @@ def deck_init(plr, dlr, main_deck, deck_n):
 
     if a < 2:
         main_deck.card_deal(plr, deck_n)
-    if plr.ace_check(deck_n) == 21:
+    if plr.ace_check(deck_n) == 21 and len(plr.deck)<3:
         plr.show_deck(deck_n)
         text = "black jack"
         win_label.configure(text=text)
+        plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2.5)
+        plr.save_data()
         a = (plr, dlr)
-        start_button_place(a)
+        if plr.p_data["gold"] <= 0:
+            for i in root.winfo_children():
+                i.destroy()
+            you_owe_me = Label(root, text="You owe me 3000 bucks")
+            you_owe_me.pack()
+        else:
+            start_button_place(a)
 
     else:
 
@@ -567,6 +583,8 @@ def button_input(plr, dlr, main_deck, deck_n, button_input):
         plr.show_deck(deck_n)
         plr.card_score(deck_n)
         end_turn = True
+        plr.p_data["gold"] = plr.p_data["gold"] - plr.bet
+        plr.bet = plr.bet * 2
         if plr.ace_check(deck_n) > 21:
             text = "BUST!"
             win_label.configure(text=text)
@@ -588,7 +606,13 @@ def button_input(plr, dlr, main_deck, deck_n, button_input):
         game_end(plr, dlr, main_deck)
     elif bust:
         a = (plr, dlr)
-        start_button_place(a)
+        if plr.p_data["gold"] <= 0:
+            for i in root.winfo_children():
+                i.destroy()
+            you_owe_me = Label(root, text="You owe me 3000 bucks")
+            you_owe_me.pack()
+        else:
+            start_button_place(a)
     elif not end_turn and not bust:
         deck_init(plr, dlr, main_deck, deck_n)
     else:
@@ -601,11 +625,14 @@ def game_end(plr, dlr, main_deck):
             if not dlr.ace_check(0) > 21:
                 if dlr.ace_check(0) < plr.ace_check(i):
                     text = "YOU WON!"
+                    plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2)
+                    plr.save_data()
                     win_label.configure(text=text)
 
                 elif dlr.ace_check(0) == plr.ace_check(i):
                     text = "DRAW"
                     win_label.configure(text=text)
+                    plr.p_data["gold"] = plr.p_data["gold"] + plr.bet
 
                 elif dlr.ace_check(0) > plr.ace_check(i):
                     text = "YOU LOST!"
@@ -614,13 +641,32 @@ def game_end(plr, dlr, main_deck):
             else:
                 text = "YOU WON!"
                 win_label.configure(text=text)
+                plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2)
+                plr.save_data()
 
         else:
             text = "YOU WON!"
             win_label.configure(text=text)
+            plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2)
+            plr.save_data()
 
     a = (plr, dlr)
-    start_button_place(a)
+    print(f"gold at the end{plr.p_data}")
+    if plr.p_data["gold"] <= 0:
+       for i in root.winfo_children():
+           i.destroy()
+       you_owe_me = Label (root, text ="You owe me 3000 bucks")
+       you_owe_me.pack()
+    else:
+        start_button_place(a)
+
+def betting(p1, dlr, main_deck,  bet, list):
+        p1.p_data["gold"] = p1.p_data["gold"] - int(bet)
+        p1.bet = int(bet)
+        for i in list:
+            i.destroy()
+        deck_init(p1, dlr, main_deck, 0)
+        win_label.configure(text="")
 
 
 
@@ -642,10 +688,6 @@ def game_start(p1, dlr):
     main_deck.card_deal(dlr, 0)
 
     # checking block
-
-    dlr.show_top_deck()
-
-
     return main_deck
 
 def game(plr, dlr):
@@ -674,9 +716,14 @@ def game(plr, dlr):
     plr_name_lbl = Label(root, text=f"{name_upper}'S HAND", bg="#C4C4C4")
     plr_name_lbl.configure(font=("Open Sans", 14, "italic"))
     plr_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.555)
+    print(plr.p_data)
+    gold = plr.p_data["gold"]
+    #todo add this to a proper widget
+    plr_gold_lbl = Label(root, text =f"{name_upper} gold ={gold}")
+    plr_gold_lbl.configure(font=("Open Sans", 14, "italic"))
+    plr_gold_lbl.pack()
 
-
-    plr_score_lbl = Label(root, text=f"f{name_upper}'S SCORE: ???", bg="#D6D6D6", bd=0)
+    plr_score_lbl = Label(root, text=f"{name_upper}'S SCORE: ???", bg="#D6D6D6", bd=0)
     plr_score_lbl.configure(font=("Open Sans", 12, "bold"))
     plr_score_lbl.place(relheight=0.0499, relwidth=0.896, relx=0.05, rely=0.791)
 
@@ -696,7 +743,46 @@ def game(plr, dlr):
 #    lbl.grid(row=0, column=0)
 
     main_deck = game_start(plr, dlr)
-    deck_init(plr, dlr, main_deck, 0)
+    betting_buttons_place(plr, dlr, main_deck)
+    #deck_init(plr, dlr, main_deck, 0)
+
+def betting_buttons_place(plr, dlr, main_deck):
+    lst_bet_buttons = list()
+
+    max_bet = Button(root, text="MAX BET", bg="#969696",
+                     command=lambda :betting(plr, dlr,main_deck, plr.p_data["gold"], lst_bet_buttons))
+    max_bet.configure(font=("Open Sans", 11, "bold"))
+    max_bet.place(relheight=0.083, relwidth=0.166, relx=0.126, rely=0.872)
+
+    tenth_bet = Button(root, text="1/10 BET", bg="#969696",
+                       command=lambda :betting(plr, dlr, main_deck, plr.p_data["gold"]/10, lst_bet_buttons))
+    tenth_bet.configure(font=("Open Sans", 11, "bold"))
+    tenth_bet.place(relheight=0.083, relwidth=0.166, relx=0.313, rely=0.872)
+
+
+    bet_entry = Entry(root, text="BET", bg="#969696")
+    bet_entry.configure(font=("Open Sans", 11, "bold"))
+    bet_entry.place(relheight=0.083, relwidth=0.166, relx=0.687, rely=0.872)
+
+    input_bet = Button(root, text="BET", bg="#969696",
+                       command=lambda :bet_button(plr, dlr, main_deck, bet_entry.get(), lst_bet_buttons))
+    input_bet.configure(font=("Open Sans", 11, "bold"))
+    input_bet.place(relheight=0.083, relwidth=0.166, relx=0.5, rely=0.872)
+
+
+    lst_bet_buttons.append(max_bet)
+    lst_bet_buttons.append(tenth_bet)
+    lst_bet_buttons.append(input_bet)
+    lst_bet_buttons.append(bet_entry)
+
+def bet_button(plr, dlr, main_deck, bet, lst_bet_buttons):
+    if int(bet) > int(plr.p_data["gold"]):
+        win_label.configure(text="BET'S TOO BIG, MAN")
+        for i in lst_bet_buttons:
+            i.destroy()
+        betting_buttons_place(plr, dlr, main_deck)
+    else:
+        betting(plr, dlr, main_deck, bet, lst_bet_buttons)
 
 
 def start_button(a):
@@ -747,3 +833,4 @@ login_button.place(rely=0.55, relx=0.34)
 #start_button_place()
 root.mainloop()
 
+#todo a gold check on the end of the turn
