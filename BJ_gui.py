@@ -787,18 +787,17 @@ def bet_button(plr, dlr, main_deck, bet, lst_bet_buttons):
 
 
 def start_button(a):
-    if len(root.winfo_children())>1:
-		dealer_hand.destroy()
-		dealer_score_lbl.destroy()
-		dealer_name_lbl.destroy()
-		plr_name_lbl.destroy()
-		player_hand.destroy()
-		plr_name_lbl.destroy()
-		plr_score_lbl.destroy()
-		win_label.destroy()
-
-    game(*a)
-    startb.destroy()
+	if len(root.winfo_children())>1:
+        dealer_hand.destroy()
+        dealer_score_lbl.destroy()
+        dealer_name_lbl.destroy()
+        plr_name_lbl.destroy()
+        player_hand.destroy()
+        plr_name_lbl.destroy()
+        plr_score_lbl.destroy()
+        win_label.destroy()
+	game(*a)
+	startb.destroy()
 
 
 def start_button_place(a):
