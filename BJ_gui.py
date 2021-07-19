@@ -695,7 +695,7 @@ def game(plr, dlr):
 
     #dealer zone
 
-    global dealer_hand, dealer_score_lbl, dealer_name_lbl, player_hand, plr_score_lbl, plr_name_lbl, win_label
+    global dealer_hand, dealer_score_lbl, dealer_name_lbl, player_hand, plr_score_lbl, plr_name_lbl, win_label, plr_gold_lbl
     dealer_hand = Canvas(root, bg="#C4C4C4", highlightthickness=1, highlightbackground="#989898")
     dealer_hand.place(relheight=0.225, relwidth=0.896, relx=0.05, rely=0.116)
 
@@ -787,17 +787,18 @@ def bet_button(plr, dlr, main_deck, bet, lst_bet_buttons):
 
 
 def start_button(a):
-	if len(root.winfo_children())>1:
+    if len(root.winfo_children())>1:
         dealer_hand.destroy()
         dealer_score_lbl.destroy()
         dealer_name_lbl.destroy()
         plr_name_lbl.destroy()
+        plr_gold_lbl.destroy()
         player_hand.destroy()
         plr_name_lbl.destroy()
         plr_score_lbl.destroy()
         win_label.destroy()
-	game(*a)
-	startb.destroy()
+    game(*a)
+    startb.destroy()
 
 
 def start_button_place(a):
