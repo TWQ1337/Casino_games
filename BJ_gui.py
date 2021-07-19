@@ -718,6 +718,7 @@ def game(plr, dlr):
     plr_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.555)
     print(plr.p_data)
     gold = plr.p_data["gold"]
+	
     #todo add this to a proper widget
     plr_gold_lbl = Label(root, text =f"{name_upper} gold ={gold}")
     plr_gold_lbl.configure(font=("Open Sans", 14, "italic"))
@@ -787,14 +788,14 @@ def bet_button(plr, dlr, main_deck, bet, lst_bet_buttons):
 
 def start_button(a):
     if len(root.winfo_children())>1:
-        dealer_hand.destroy()
-        dealer_score_lbl.destroy()
-        dealer_name_lbl.destroy()
-
-        player_hand.destroy()
-        plr_name_lbl.destroy()
-        plr_score_lbl.destroy()
-        win_label.destroy()
+		dealer_hand.destroy()
+		dealer_score_lbl.destroy()
+		dealer_name_lbl.destroy()
+		plr_name_lbl.destroy()
+		player_hand.destroy()
+		plr_name_lbl.destroy()
+		plr_score_lbl.destroy()
+		win_label.destroy()
 
     game(*a)
     startb.destroy()
