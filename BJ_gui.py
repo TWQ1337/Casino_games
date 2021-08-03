@@ -4,8 +4,10 @@ from tkinter import *
 from PIL import ImageTk,Image
 import secrets
 import time
+import Main_menu
 
 #gui init
+
 root = Tk()
 root.title("Casino Games V_0.2")
 root.iconbitmap("data/card-games.ico")
@@ -544,6 +546,7 @@ def deck_init(plr, dlr, main_deck, deck_n):
         text = "black jack"
         win_label.configure(text=text)
         plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2.5)
+        win_txt.configure(text=f"WON: {plr.bet * 2.5} ")
         plr.save_data()
         a = (plr, dlr)
         if plr.p_data["gold"] <= 0:
@@ -628,6 +631,7 @@ def game_end(plr, dlr, main_deck):
                     plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2)
                     plr.save_data()
                     win_label.configure(text=text)
+                    win_txt.configure(text=f"WON: {plr.bet * 2} ")
 
                 elif dlr.ace_check(0) == plr.ace_check(i):
                     text = "DRAW"
@@ -642,12 +646,14 @@ def game_end(plr, dlr, main_deck):
                 text = "YOU WON!"
                 win_label.configure(text=text)
                 plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2)
+                win_txt.configure(text=f"WON: {plr.bet*2} ")
                 plr.save_data()
 
         else:
             text = "YOU WON!"
             win_label.configure(text=text)
             plr.p_data["gold"] = plr.p_data["gold"] + (plr.bet*2)
+            win_txt.configure(text=f"WON: {plr.bet * 2} ")
             plr.save_data()
 
     a = (plr, dlr)
@@ -667,6 +673,9 @@ def betting(p1, dlr, main_deck,  bet, list):
             i.destroy()
         deck_init(p1, dlr, main_deck, 0)
         win_label.configure(text="")
+        bet_txt.configure(text=f"BET: {bet}")
+        gold = p1.p_data["gold"]
+        plr_gold_lbl.configure(text=f"BALANCE: {gold}")
 
 
 
@@ -692,46 +701,81 @@ def game_start(p1, dlr):
 
 def game(plr, dlr):
     #initing zones
+    global dealer_hand, dealer_score_lbl, dealer_name_lbl,\
+        player_hand, plr_score_lbl, plr_name_lbl, win_label, plr_gold_lbl,status_bar, leave_the_game\
+        ,bet_canvas, bet_txt, win_txt
+
+
+    # gui
+    status_bar = Label(root, text="BLACKJACK", bg="#CFCFCF", anchor="w")
+    status_bar.place(relheight=0.044, relwidth=1, relx=0.0, rely=0.0)
+    status_bar.configure(font=("Open Sans", 10, "bold"))
+
+    leave_the_game = Button(root, text="LEAVE THE GAME", bg="#434343", fg="#FFFFFF",
+                            command=lambda :leave_button(plr, dlr))
+    leave_the_game.configure(font=("Open Sans", 10, "bold"))
+    leave_the_game.place(relheight=0.044, relwidth=0.182, relx=0.817, rely=0.0)
+
+    bet_canvas = Canvas(root, bg="#BCBCBC", highlightthickness=1, highlightbackground="#A9A9A9")
+    bet_canvas.place(relheight=0.06, relwidth=0.491, relx=0.0, rely=0.737)
+
+    bet_txt = Label(bet_canvas, text="Bet:-", fg="#727272", bg="#BCBCBC")
+    bet_txt.configure(font=("Open Sans", 18, "bold"))
+    bet_txt.place(relx=0.402, rely=0.0287)
+
+
+    win_canvas = Canvas(root, bg="#BCBCBC", highlightthickness=1, highlightbackground="#A9A9A9")
+    win_canvas.place(relheight=0.128, relwidth=0.502, relx=0.498, rely=0.737)
+
+    win_txt = Label(win_canvas, text="WON: - ", fg="#727272", bg="#BCBCBC")
+    win_txt.configure(font=("Open Sans", 18, "bold"))
+    win_txt.place(relx=0.402, rely=0.0287)
+
+
+    balance_canvas = Canvas(root, bg="#BCBCBC", highlightthickness=1, highlightbackground="#A9A9A9")
+    balance_canvas.place(relheight=0.06, relwidth=0.491, relx=0, rely=0.803)
+
+    gold = plr.p_data["gold"]
+    name_upper = plr.name.upper()
+
+
+    plr_gold_lbl = Label(balance_canvas, text=f"BALANCE: {gold}", fg="#727272", bg="#BCBCBC")
+    plr_gold_lbl.configure(font=("Open Sans", 18, "bold"))
+    plr_gold_lbl.place(relx=0.268, rely=0.0287)
+
 
     #dealer zone
 
-    global dealer_hand, dealer_score_lbl, dealer_name_lbl, player_hand, plr_score_lbl, plr_name_lbl, win_label, plr_gold_lbl
     dealer_hand = Canvas(root, bg="#C4C4C4", highlightthickness=1, highlightbackground="#989898")
-    dealer_hand.place(relheight=0.225, relwidth=0.896, relx=0.05, rely=0.116)
+    dealer_hand.place(relheight=0.197, relwidth=0.8589, relx=0.0679, rely=0.130)
 
-    dealer_name_lbl = Label(root, text=f"{dlr.name}'s hand", bg="#C4C4C4")
-    dealer_name_lbl.configure(font=("Open Sans", 14, "italic"))
-    dealer_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.33)
+    dealer_name_lbl = Label(root, text=f"{dlr.name}'S HAND", bg="#C4C4C4")
+    dealer_name_lbl.configure(font=("Open Sans", 12, "italic"))
+    dealer_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.31)
 
     dealer_score_lbl = Label(root, text=f"{dlr.name}'S SCORE: ???", bg="#D6D6D6", bd=0)
     dealer_score_lbl.configure(font=("Open Sans", 12, "bold"))
-    dealer_score_lbl.place(relheight=0.0499, relwidth=0.896, relx=0.05, rely=0.063)
+    dealer_score_lbl.place(relheight=0.053, relwidth=0.8589, relx=0.0679, rely=0.0769)
 
     #plr zone
 
-    name_upper = plr.name.upper()
     player_hand = Canvas(root, bg="#C4C4C4", highlightthickness=1, highlightbackground="#989898")
-    player_hand.place(relheight=0.225, relwidth=0.896, relx=0.05, rely=0.566)
+    player_hand.place(relheight=0.197, relwidth=0.8589, relx=0.0679, rely=0.441)
 
     plr_name_lbl = Label(root, text=f"{name_upper}'S HAND", bg="#C4C4C4")
-    plr_name_lbl.configure(font=("Open Sans", 14, "italic"))
-    plr_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.555)
+    plr_name_lbl.configure(font=("Open Sans", 12, "italic"))
+    plr_name_lbl.place(relheight=0.03, relwidth=0.4, relx=0.30, rely=0.433)
     print(plr.p_data)
-    gold = plr.p_data["gold"]
-	
-    #todo add this to a proper widget
-    plr_gold_lbl = Label(root, text =f"{name_upper} gold ={gold}")
-    plr_gold_lbl.configure(font=("Open Sans", 14, "italic"))
-    plr_gold_lbl.pack()
+
 
     plr_score_lbl = Label(root, text=f"{name_upper}'S SCORE: ???", bg="#D6D6D6", bd=0)
     plr_score_lbl.configure(font=("Open Sans", 12, "bold"))
-    plr_score_lbl.place(relheight=0.0499, relwidth=0.896, relx=0.05, rely=0.791)
+    plr_score_lbl.place(relheight=0.053, relwidth=0.8589, relx=0.0679, rely=0.640)
 
     #win status
     #todo fix scaling issues
     win_label = Label(root, bg="#C4C4C4")
-    win_label.configure(font=("Open Sans", 25, "bold"))
+    win_label.configure(font=("Open Sans", 14, "bold"))
     win_label.place(relx=0.38, rely=0.4)
 
     #    log = LabelFrame(root, text="log", padx=50, pady=100)
@@ -750,25 +794,29 @@ def game(plr, dlr):
 def betting_buttons_place(plr, dlr, main_deck):
     lst_bet_buttons = list()
 
-    max_bet = Button(root, text="MAX BET", bg="#969696",
+    max_bet = Button(root, text="MAX BET", bg="#969696", bd=0,
                      command=lambda :betting(plr, dlr,main_deck, plr.p_data["gold"], lst_bet_buttons))
     max_bet.configure(font=("Open Sans", 11, "bold"))
-    max_bet.place(relheight=0.083, relwidth=0.166, relx=0.126, rely=0.872)
+    max_bet.place(relheight=0.060, relwidth=0.163, relx=0.10, rely=0.906)
 
-    tenth_bet = Button(root, text="1/10 BET", bg="#969696",
+    tenth_bet = Button(root, text="1/10 BET", bg="#969696", bd=0,
                        command=lambda :betting(plr, dlr, main_deck, plr.p_data["gold"]/10, lst_bet_buttons))
     tenth_bet.configure(font=("Open Sans", 11, "bold"))
-    tenth_bet.place(relheight=0.083, relwidth=0.166, relx=0.313, rely=0.872)
+    tenth_bet.place(relheight=0.060, relwidth=0.163, relx=0.285, rely=0.906)
 
 
-    bet_entry = Entry(root, text="BET", bg="#969696")
-    bet_entry.configure(font=("Open Sans", 11, "bold"))
-    bet_entry.place(relheight=0.083, relwidth=0.166, relx=0.687, rely=0.872)
+    bet_entry = Entry(root, text="BET", bg="#B4B4B4", bd=0, fg="#969696")
+    bet_entry.configure(font=("Open Sans", 10, "bold"))
+    bet_entry.place(relheight=0.060, relwidth=0.165, relx=0.735, rely=0.906)
 
-    input_bet = Button(root, text="BET", bg="#969696",
+    bet_entry.insert(END, "type your bet here")
+    bet_entry.bind("<Key>", on_click)
+    bet_entry.focus()
+
+    input_bet = Button(root, text="BET", bg="#969696", bd=0,
                        command=lambda :bet_button(plr, dlr, main_deck, bet_entry.get(), lst_bet_buttons))
     input_bet.configure(font=("Open Sans", 11, "bold"))
-    input_bet.place(relheight=0.083, relwidth=0.166, relx=0.5, rely=0.872)
+    input_bet.place(relheight=0.060, relwidth=0.266, relx=0.47, rely=0.906)
 
 
     lst_bet_buttons.append(max_bet)
@@ -785,20 +833,29 @@ def bet_button(plr, dlr, main_deck, bet, lst_bet_buttons):
     else:
         betting(plr, dlr, main_deck, bet, lst_bet_buttons)
 
+def leave_button(plr, dlr):
+    for i in root.winfo_children():
+        i.destroy()
+    main_menu(plr, dlr)
+
 
 def start_button(a):
     if len(root.winfo_children())>1:
-        dealer_hand.destroy()
+        '''
         dealer_score_lbl.destroy()
         dealer_name_lbl.destroy()
+        dealer_hand.destroy()
         plr_name_lbl.destroy()
         plr_gold_lbl.destroy()
         player_hand.destroy()
         plr_name_lbl.destroy()
         plr_score_lbl.destroy()
         win_label.destroy()
+        '''
+        for i in root.winfo_children():
+            i.destroy()
     game(*a)
-    startb.destroy()
+    #startb.destroy()
 
 
 def start_button_place(a):
@@ -808,28 +865,72 @@ def start_button_place(a):
     startb.place(relheight=0.0838, relwidth=0.653, relx=0.173, rely=0.864)
 
 def game_loop(p_name):
-    d1_p1 = game_init(p_name)
-    start_button_place(d1_p1)
+    p1_d1 = game_init(p_name)
+    main_menu(*p1_d1)
+    #start_button_place(d1_p1)
 
 
-def login():
-    p1 = txt.get()
+def login(p1):
     for i in root.winfo_children():
         i.destroy()
     game_loop(p1)
+    root.configure(bg="#C4C4C4")
 
-txt = Entry(root, width=10)
-txt.place(rely=0.45, relx=0.45)
-txt.focus()
+def main_menu(plr, dlr):
+    a = plr, dlr
+    plr_info_area = Canvas(root, bg="#CFCFCF", highlightthickness=1, highlightbackground="#BABABA")
+    plr_info_area.place(relheight=0.1628, relwidth=1, relx=0, rely=0)
+    gold = plr.p_data["gold"]
+    plr_stats_area = Label(root, bg="#DADADA", text=f"{gold} |  Stat1 Stat2 Stat3 Stat 4", fg="#727272")
+    plr_stats_area.configure(font=("Open Sans", 18, "bold"))
+    plr_stats_area.place(relheight=0.0718, relwidth=0.7154, relx=0.2179, rely=0.0615)
 
-login_button = Button(root, text="Login", command=login)
-login_button.place(rely=0.55, relx=0.34)
+    plr_name_area = Label(root, bg="#CFCFCF", text=f"{plr.name}", fg="#000000")
+    plr_name_area.configure(font=("Open Sans", 10, "bold"))
+    plr_name_area.place(relheight=0.0244, relwidth=0.1397, relx=0.2359, rely=0.0256)
+
+    games_button_section = Canvas(root, bg="#CFCFCF", highlightthickness=2, highlightbackground="#A7A7A7")
+    games_button_section.place(relheight=0.7654, relwidth=0.4397, relx=0.4962, rely=0.1987)
+
+    bj_button = Button(root, text="BLACKJACK", fg="#FFFFFF", bg="#4F4F4F", bd=0, command=lambda: start_button(a))
+    bj_button.place(relwidth=0.3871, relheight=0.191, relx=0.5205, rely=0.3012)
+
+    cm_button = Button(root, text="CRASH MARKET", fg="#FFFFFF", bg="#4F4F4F", bd=0)
+    cm_button.place(relwidth=0.3871, relheight=0.191, relx=0.5205, rely=0.5179)
+
+    pkr_button = Button(root, text="POKER", fg="#FFFFFF", bg="#4F4F4F", bd=0)
+    pkr_button.place(relwidth=0.3871, relheight=0.191, relx=0.5205, rely=0.7346)
+
+    image1 = Image.open("data/trump.png")
+    test = ImageTk.PhotoImage(image1)
+
+    label1 = Label(image=test)
+    label1.image = test
+    # Position image
+    label1.place(relx=0.02, rely=0.1987)
+
+def on_click(event):
+    if event.widget.get()=="TYPE YOUR NAME HERE":
+        event.widget.delete(0, END)
+    elif event.widget.get()=="type your bet here":
+        event.widget.delete(0, END)
+def log_in():
+    root.configure(bg="#1F1F1F")
+    txt = Entry(root, width=10, bg="#303030", fg="#545454", bd=0)
+    txt.place(relheight=0.041, relwidth=0.5821, rely=0.4231, relx=0.209)
+    txt.focus()
+    txt.insert(END, "TYPE YOUR NAME HERE")
+    txt.bind("<Key>", on_click)
+    #txt.configure(font=())
+
+
+    login_button = Button(root, text="LOG IN", bg="#FFEA28", command=lambda: login(txt.get()))
+    login_button.place(relheight=0.0718, relwidth=0.5821, rely=0.4897, relx=0.209)
 
 
 
 
-
-
+log_in()
 #game_loop()
 #start_button_place()
 root.mainloop()
