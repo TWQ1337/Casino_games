@@ -3,8 +3,8 @@ import os
 from tkinter import *
 from PIL import ImageTk,Image
 import secrets
-import time
-import Main_menu
+#import time
+#import Main_menu
 
 #gui init
 
@@ -929,10 +929,10 @@ def log_in():
 
 
 
-
-log_in()
-#game_loop()
-#start_button_place()
-root.mainloop()
+if __name__ == "__main__":
+    log_in()
+    #game_loop()
+    #start_button_place()
+    root.mainloop()
 
 #todo a gold check on the end of the turn
